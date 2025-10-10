@@ -11,7 +11,7 @@ const DashboardPage = async () => {
   ])
 
   return (
-    <div className="px-5">
+    <div className="">
       {/* accounts grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <CreateAccountDrawer>
