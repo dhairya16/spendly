@@ -8,6 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from '@/components/ui/table'
 import { categoryColors } from '@/data/categories'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -46,7 +47,20 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { toast } from 'sonner'
+import { BarLoader } from 'react-spinners'
+import useFetch from '@/hooks/use-fetch'
+import { bulkDeleteTransactions } from '@/actions/account'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 
 const RECURRING_INTERVALS = {
   DAILY: 'Daily',
@@ -66,7 +80,7 @@ const TransactionTable = ({ transactions }) => {
   const [typeFilter, setTypeFilter] = useState('')
   const [recurringFilter, setRecurringFilter] = useState('')
 
-  //   const filteredTransactions = transactions
+  const [currentPage, setCurrentPage] = useState(1)
 
   // Memoized filtered and sorted transactions
   const filteredTransactions = useMemo(() => {
@@ -117,6 +131,17 @@ const TransactionTable = ({ transactions }) => {
     return result
   }, [transactions, searchTerm, typeFilter, recurringFilter, sortConfig])
 
+  const recordsPerPage = 10
+  const numPages = Math.ceil(filteredTransactions.length / recordsPerPage)
+
+  const indexOfLastRecord = currentPage * recordsPerPage
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage
+
+  const paginatedTransactions = filteredTransactions.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  )
+
   const handleSort = (field) => {
     setSortConfig((current) => ({
       field,
@@ -135,13 +160,34 @@ const TransactionTable = ({ transactions }) => {
 
   const handleSelectAll = () => {
     setSelectedIds((current) =>
-      current.length === filteredTransactions.length
+      current.length === paginatedTransactions.length
         ? []
-        : filteredTransactions.map((t) => t.id)
+        : paginatedTransactions.map((t) => t.id)
     )
   }
 
-  const handleBulkDelete = () => {}
+  const {
+    loading: deleteLoading,
+    fn: deleteFn,
+    data: deleted,
+  } = useFetch(bulkDeleteTransactions)
+
+  const handleBulkDelete = async () => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedIds.length} transactions?`
+      )
+    )
+      return
+
+    deleteFn(selectedIds)
+  }
+
+  useEffect(() => {
+    if (deleted && !deleteLoading) {
+      toast.error('Transactions deleted successfully')
+    }
+  }, [deleted, deleteLoading])
 
   const handleClearFilters = () => {
     setSearchTerm('')
@@ -150,8 +196,15 @@ const TransactionTable = ({ transactions }) => {
     setCurrentPage(1)
   }
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
+
   return (
-    <div>
+    <div className="space-y-4">
+      {deleteLoading && (
+        <BarLoader className="mt-4" width={'100%'} color="#9333ea" />
+      )}
       {/* filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -228,7 +281,7 @@ const TransactionTable = ({ transactions }) => {
 
       {/* transactions */}
       <div className="">
-        <Table>
+        <Table className="">
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">
@@ -287,7 +340,7 @@ const TransactionTable = ({ transactions }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredTransactions.length === 0 ? (
+            {paginatedTransactions.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}
@@ -297,7 +350,7 @@ const TransactionTable = ({ transactions }) => {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredTransactions.map((transaction) => (
+              paginatedTransactions.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell>
                     <Checkbox
@@ -398,6 +451,49 @@ const TransactionTable = ({ transactions }) => {
             )}
           </TableBody>
         </Table>
+        <div className="my-2">
+          {/* Pagination UI */}
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className={
+                    currentPage === 1 ? 'pointer-events-none opacity-50' : ''
+                  }
+                />
+              </PaginationItem>
+
+              {/* Render page numbers dynamically */}
+              {Array.from({ length: numPages }, (_, i) => i + 1).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    onClick={() => handlePageChange(page)}
+                    isActive={currentPage === page}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              {numPages > 5 && <PaginationEllipsis />}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className={
+                    currentPage === numPages
+                      ? 'pointer-events-none opacity-50'
+                      : ''
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
     </div>
   )
