@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 
+import ReceiptScanner from '@/app/(main)/transaction/_components/ReceiptScanner'
 import {
   Popover,
   PopoverContent,
@@ -90,9 +91,25 @@ const TransactionForm = ({ accounts, categories }) => {
     }
   }, [transactionResult, transactionLoading])
 
+  const handleScanComplete = (scannedData) => {
+    console.log(scannedData)
+    if (scannedData) {
+      setValue('amount', scannedData.amount.toString())
+      setValue('date', new Date(scannedData.date))
+      if (scannedData.description) {
+        setValue('description', scannedData.description)
+      }
+      if (scannedData.category) {
+        setValue('category', scannedData.category)
+      }
+      toast.success('Receipt scanned successfully')
+    }
+  }
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {/* ai receipt scanner */}
+      <ReceiptScanner onScanComplete={handleScanComplete} />
 
       {/* type */}
       <div className="space-y-2 grid">
