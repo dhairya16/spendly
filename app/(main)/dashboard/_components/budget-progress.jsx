@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Pencil, Check, X } from 'lucide-react'
 import useFetch from '@/hooks/use-fetch'
+import { Check, Pencil, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { updateBudget } from '@/actions/budget'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -12,10 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { updateBudget } from '@/actions/budget'
+import { Progress } from '@/components/ui/progress'
 
 export default function BudgetProgress({ initialBudget, currentExpenses }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -126,13 +126,13 @@ export default function BudgetProgress({ initialBudget, currentExpenses }) {
           <div className="space-y-2">
             <Progress
               value={percentUsed}
-              extraStyles={`${
+              className={`${
                 // add to Progress component
                 percentUsed >= 90
                   ? 'bg-red-500'
                   : percentUsed >= 75
-                  ? 'bg-yellow-500'
-                  : 'bg-green-500'
+                    ? 'bg-yellow-500'
+                    : 'bg-green-500'
               }`}
             />
             <p className="text-xs text-muted-foreground text-right">

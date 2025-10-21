@@ -1,15 +1,8 @@
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from '@clerk/nextjs'
-import Image from 'next/image'
+import { checkUser } from '@/lib/checkUser'
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { LayoutDashboard, PenBox } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from './ui/button'
-import { LayoutDashboard, PenBox } from 'lucide-react'
-import { checkUser } from '@/lib/checkUser'
 
 const Header = async () => {
   await checkUser()
@@ -25,7 +18,7 @@ const Header = async () => {
             height={60}
             className="h-12 w-auto object-contain"
           /> */}
-          <span className="text-amber-700">Spendly</span>
+          <span className="">Spendly</span>
         </Link>
 
         <div className="flex items-center space-x-4">
