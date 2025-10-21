@@ -8,14 +8,15 @@ import { toast } from 'sonner'
 import { updateBudget } from '@/actions/budget'
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
+import { formatCurrency } from '@/lib/currency'
 
 export default function BudgetProgress({ initialBudget, currentExpenses }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -64,7 +65,7 @@ export default function BudgetProgress({ initialBudget, currentExpenses }) {
   }, [error])
 
   return (
-    <Card>
+    <Card className="financial-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex-1">
           <CardTitle className="text-sm font-medium">
@@ -88,7 +89,7 @@ export default function BudgetProgress({ initialBudget, currentExpenses }) {
                   onClick={handleUpdateBudget}
                   disabled={isLoading}
                 >
-                  <Check className="h-4 w-4 text-green-500" />
+                  <Check className="h-4 w-4 income-positive" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -96,16 +97,16 @@ export default function BudgetProgress({ initialBudget, currentExpenses }) {
                   onClick={handleCancel}
                   disabled={isLoading}
                 >
-                  <X className="h-4 w-4 text-red-500" />
+                  <X className="h-4 w-4 expense-negative" />
                 </Button>
               </div>
             ) : (
               <>
                 <CardDescription>
                   {initialBudget
-                    ? `$${currentExpenses.toFixed(
-                        2
-                      )} of $${initialBudget.amount.toFixed(2)} spent`
+                    ? `${formatCurrency(currentExpenses)} of ${formatCurrency(
+                        initialBudget.amount
+                      )} spent`
                     : 'No budget set'}
                 </CardDescription>
                 <Button
@@ -127,7 +128,6 @@ export default function BudgetProgress({ initialBudget, currentExpenses }) {
             <Progress
               value={percentUsed}
               className={`${
-                // add to Progress component
                 percentUsed >= 90
                   ? 'bg-red-500'
                   : percentUsed >= 75

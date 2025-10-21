@@ -20,16 +20,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { formatCurrency } from '@/lib/currency'
 import { cn } from '@/lib/utils'
 
 const COLORS = [
-  '#FF6B6B',
-  '#4ECDC4',
-  '#45B7D1',
-  '#96CEB4',
-  '#FFEEAD',
-  '#D4A5A5',
-  '#9FA8DA',
+  '#3B82F6', // Blue
+  '#10B981', // Green
+  '#F59E0B', // Amber
+  '#EF4444', // Red
+  '#8B5CF6', // Purple
+  '#06B6D4', // Cyan
+  '#F97316', // Orange
 ]
 
 export default function DashboardOverview({ accounts, transactions }) {
@@ -77,18 +78,18 @@ export default function DashboardOverview({ accounts, transactions }) {
   )
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-6 lg:grid-cols-2">
       {/* Recent Transactions Card */}
-      <Card>
+      <Card className="financial-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-base font-normal">
+          <CardTitle className="text-lg font-semibold text-foreground">
             Recent Transactions
           </CardTitle>
           <Select
             value={selectedAccountId}
             onValueChange={setSelectedAccountId}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="financial-card w-[160px]">
               <SelectValue placeholder="Select account" />
             </SelectTrigger>
             <SelectContent>
@@ -103,38 +104,44 @@ export default function DashboardOverview({ accounts, transactions }) {
         <CardContent>
           <div className="space-y-4">
             {recentTransactions.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">
-                No recent transactions
-              </p>
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ArrowDownRight className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground">No recent transactions</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Start by adding your first transaction
+                </p>
+              </div>
             ) : (
               recentTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors"
                 >
                   <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">
+                    <p className="text-sm font-medium leading-none text-foreground">
                       {transaction.description || 'Untitled Transaction'}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(transaction.date), 'PP')}
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(transaction.date), 'MMM dd, yyyy')}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div
                       className={cn(
-                        'flex items-center',
+                        'flex items-center font-semibold text-sm px-2 py-1 rounded-md',
                         transaction.type === 'EXPENSE'
-                          ? 'text-red-500'
-                          : 'text-green-500'
+                          ? 'expense-negative bg-red-50 dark:bg-red-950/20'
+                          : 'income-positive bg-green-50 dark:bg-green-950/20'
                       )}
                     >
                       {transaction.type === 'EXPENSE' ? (
-                        <ArrowDownRight className="mr-1 h-4 w-4" />
+                        <ArrowDownRight className="mr-1 h-3 w-3" />
                       ) : (
-                        <ArrowUpRight className="mr-1 h-4 w-4" />
+                        <ArrowUpRight className="mr-1 h-3 w-3" />
                       )}
-                      ${transaction.amount.toFixed(2)}
+                      {formatCurrency(transaction.amount)}
                     </div>
                   </div>
                 </div>
@@ -145,29 +152,40 @@ export default function DashboardOverview({ accounts, transactions }) {
       </Card>
 
       {/* Expense Breakdown Card */}
-      <Card>
+      <Card className="financial-card">
         <CardHeader>
-          <CardTitle className="text-base font-normal">
+          <CardTitle className="text-lg font-semibold text-foreground">
             Monthly Expense Breakdown
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0 pb-5">
           {pieChartData.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">
-              No expenses this month
-            </p>
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-8 h-8 bg-muted-foreground/20 rounded-full flex items-center justify-center">
+                  <span className="text-muted-foreground text-xs">₹</span>
+                </div>
+              </div>
+              <p className="text-muted-foreground">No expenses this month</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Track your spending to see insights
+              </p>
+            </div>
           ) : (
-            <div className="h-[300px]">
+            <div className="h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={pieChartData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
+                    outerRadius={90}
+                    innerRadius={30}
                     dataKey="value"
-                    label={({ name, value }) => `${name}: $${value.toFixed(2)}`}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                    labelLine={false}
                   >
                     {pieChartData.map((entry, index) => (
                       <Cell
@@ -177,14 +195,21 @@ export default function DashboardOverview({ accounts, transactions }) {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value) => `$${value.toFixed(2)}`}
+                    formatter={(value, name) => [formatCurrency(value), name]}
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--popover))',
-                      border: '1px solid hsl(var(--border))',
+                      backgroundColor: 'var(--popover)',
+                      border: '1px solid var(--border)',
                       borderRadius: 'var(--radius)',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                     }}
                   />
-                  <Legend />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    formatter={(value) => (
+                      <span className="text-sm text-foreground">{value}</span>
+                    )}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>

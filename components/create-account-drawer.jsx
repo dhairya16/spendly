@@ -1,32 +1,32 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import useFetch from '@/hooks/use-fetch'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
-import useFetch from '@/hooks/use-fetch'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
+import { createAccount } from '@/actions/dashboard'
+import { accountSchema } from '@/app/lib/schema'
 import { Button } from '@/components/ui/button'
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-  DrawerClose,
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { createAccount } from '@/actions/dashboard'
-import { accountSchema } from '@/app/lib/schema'
 
 export default function CreateAccountDrawer({ children }) {
   const [open, setOpen] = useState(false)
@@ -85,24 +85,25 @@ export default function CreateAccountDrawer({ children }) {
             <div className="space-y-2">
               <label
                 htmlFor="name"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium text-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Account Name
               </label>
               <Input
                 id="name"
                 placeholder="e.g., Main Checking"
+                className="financial-card"
                 {...register('name')}
               />
               {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
+                <p className="text-sm expense-negative">{errors.name.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
               <label
                 htmlFor="type"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium text-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Account Type
               </label>
@@ -110,7 +111,7 @@ export default function CreateAccountDrawer({ children }) {
                 onValueChange={(value) => setValue('type', value)}
                 defaultValue={watch('type')}
               >
-                <SelectTrigger id="type">
+                <SelectTrigger id="type" className="financial-card">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -119,14 +120,14 @@ export default function CreateAccountDrawer({ children }) {
                 </SelectContent>
               </Select>
               {errors.type && (
-                <p className="text-sm text-red-500">{errors.type.message}</p>
+                <p className="text-sm expense-negative">{errors.type.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
               <label
                 htmlFor="balance"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium text-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Initial Balance
               </label>
@@ -135,18 +136,19 @@ export default function CreateAccountDrawer({ children }) {
                 type="number"
                 step="0.01"
                 placeholder="0.00"
+                className="financial-card"
                 {...register('balance')}
               />
               {errors.balance && (
-                <p className="text-sm text-red-500">{errors.balance.message}</p>
+                <p className="text-sm expense-negative">{errors.balance.message}</p>
               )}
             </div>
 
-            <div className="flex items-center justify-between rounded-lg border p-3">
+            <div className="flex items-center justify-between financial-card p-3">
               <div className="space-y-0.5">
                 <label
                   htmlFor="isDefault"
-                  className="text-base font-medium cursor-pointer"
+                  className="text-base font-medium text-foreground cursor-pointer"
                 >
                   Set as Default
                 </label>
@@ -163,13 +165,13 @@ export default function CreateAccountDrawer({ children }) {
 
             <div className="flex gap-4 pt-4">
               <DrawerClose asChild>
-                <Button type="button" variant="outline" className="flex-1">
+                <Button type="button" variant="outline" className="financial-card flex-1">
                   Cancel
                 </Button>
               </DrawerClose>
               <Button
                 type="submit"
-                className="flex-1"
+                className="financial-primary flex-1"
                 disabled={createAccountLoading}
               >
                 {createAccountLoading ? (

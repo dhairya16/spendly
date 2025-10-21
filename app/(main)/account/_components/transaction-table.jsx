@@ -1,57 +1,17 @@
 'use client'
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableFooter,
-} from '@/components/ui/table'
-import { categoryColors } from '@/data/categories'
-import { Checkbox } from '@/components/ui/checkbox'
-import { format } from 'date-fns'
+import { bulkDeleteTransactions } from '@/actions/account'
 import { Badge } from '@/components/ui/badge'
-import {
-  Clock,
-  RefreshCw,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronUp,
-  Search,
-  Trash,
-  X,
-} from 'lucide-react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
-import { useState, useMemo, useEffect } from 'react'
-import { toast } from 'sonner'
-import { BarLoader } from 'react-spinners'
-import useFetch from '@/hooks/use-fetch'
-import { bulkDeleteTransactions } from '@/actions/account'
 import {
   Pagination,
   PaginationContent,
@@ -61,6 +21,45 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { categoryColors } from '@/data/categories'
+import useFetch from '@/hooks/use-fetch'
+import { formatCurrency } from '@/lib/currency'
+import { format } from 'date-fns'
+import {
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  MoreHorizontal,
+  RefreshCw,
+  Search,
+  Trash,
+  X,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { BarLoader } from 'react-spinners'
+import { toast } from 'sonner'
 
 const RECURRING_INTERVALS = {
   DAILY: 'Daily',
@@ -89,8 +88,10 @@ const TransactionTable = ({ transactions }) => {
     // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase()
-      result = result.filter((transaction) =>
-        transaction.description?.toLowerCase().includes(searchLower)
+      result = result.filter(
+        (transaction) =>
+          transaction.description?.toLowerCase().includes(searchLower) ||
+          transaction.category?.toLowerCase().includes(searchLower)
       )
     }
 
@@ -201,185 +202,207 @@ const TransactionTable = ({ transactions }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {deleteLoading && (
-        <BarLoader className="mt-4" width={'100%'} color="#9333ea" />
-      )}
-      {/* filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search transactions..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value)
-            }}
-            className="pl-8"
-          />
+        <div className="financial-card p-4">
+          <BarLoader className="mt-4" width={'100%'} color="var(--primary)" />
         </div>
+      )}
 
-        <div className="flex gap-2">
-          <Select
-            value={typeFilter}
-            onValueChange={(value) => {
-              setTypeFilter(value)
-              setCurrentPage(1)
-            }}
-          >
-            <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="All Types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="INCOME">Income</SelectItem>
-              <SelectItem value="EXPENSE">Expense</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Filters Section */}
+      <div className="financial-card p-4">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search transactions..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+              }}
+              className="pl-10 financial-card"
+            />
+          </div>
 
-          <Select
-            value={recurringFilter}
-            onValueChange={(value) => {
-              setRecurringFilter(value)
-              setCurrentPage(1)
-            }}
-          >
-            <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="All Transactions" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recurring">Recurring Only</SelectItem>
-              <SelectItem value="non-recurring">Non-recurring Only</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap gap-2">
+            <Select
+              value={typeFilter}
+              onValueChange={(value) => {
+                setTypeFilter(value)
+                setCurrentPage(1)
+              }}
+            >
+              <SelectTrigger className="financial-card w-[140px]">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="INCOME">Income</SelectItem>
+                <SelectItem value="EXPENSE">Expense</SelectItem>
+              </SelectContent>
+            </Select>
 
-          {/* Bulk Actions */}
-          {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2">
+            <Select
+              value={recurringFilter}
+              onValueChange={(value) => {
+                setRecurringFilter(value)
+                setCurrentPage(1)
+              }}
+            >
+              <SelectTrigger className="financial-card w-[160px]">
+                <SelectValue placeholder="All Transactions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recurring">Recurring Only</SelectItem>
+                <SelectItem value="non-recurring">
+                  Non-recurring Only
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Bulk Actions */}
+            {selectedIds.length > 0 && (
               <Button
                 variant="destructive"
-                size="sm"
+                // size="sm"
                 onClick={handleBulkDelete}
+                className="financial-card"
               >
                 <Trash className="h-4 w-4 mr-2" />
-                Delete Selected ({selectedIds.length})
+                Delete ({selectedIds.length})
               </Button>
-            </div>
-          )}
+            )}
 
-          {(searchTerm || typeFilter || recurringFilter) && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleClearFilters}
-              title="Clear filters"
-            >
-              <X className="h-4 w-5" />
-            </Button>
-          )}
+            {(searchTerm || typeFilter || recurringFilter) && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleClearFilters}
+                title="Clear filters"
+                className="financial-card"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* transactions */}
-      <div className="">
-        <Table className="">
+      {/* Transactions Table */}
+      <div className="financial-card overflow-hidden">
+        <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="border-border">
               <TableHead className="w-[50px]">
                 <Checkbox onCheckedChange={handleSelectAll} />
               </TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => handleSort('date')}
               >
-                <div className="flex items-center">
-                  Date{' '}
+                <div className="flex items-center gap-1">
+                  Date
                   {sortConfig.field === 'date' &&
                     (sortConfig.direction === 'asc' ? (
-                      <ChevronUp className="ml-1 h-4 w-4" />
+                      <ChevronUp className="h-4 w-4" />
                     ) : (
-                      <ChevronDown className="ml-1 h-4 w-4" />
+                      <ChevronDown className="h-4 w-4" />
                     ))}
                 </div>
               </TableHead>
-              <TableHead
-                className="cursor-pointer"
-                onClick={() => handleSort('date')}
-              >
+              <TableHead className="cursor-pointer hover:bg-muted/50 transition-colors">
                 <div className="flex items-center">Description</div>
               </TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => handleSort('category')}
               >
-                <div className="flex items-center">
-                  Category{' '}
+                <div className="flex items-center gap-1">
+                  Category
                   {sortConfig.field === 'category' &&
                     (sortConfig.direction === 'asc' ? (
-                      <ChevronUp className="ml-1 h-4 w-4" />
+                      <ChevronUp className="h-4 w-4" />
                     ) : (
-                      <ChevronDown className="ml-1 h-4 w-4" />
+                      <ChevronDown className="h-4 w-4" />
                     ))}
                 </div>
               </TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => handleSort('amount')}
               >
-                <div className="flex items-center">
-                  Amount{' '}
+                <div className="flex items-center gap-1">
+                  Amount
                   {sortConfig.field === 'amount' &&
                     (sortConfig.direction === 'asc' ? (
-                      <ChevronUp className="ml-1 h-4 w-4" />
+                      <ChevronUp className="h-4 w-4" />
                     ) : (
-                      <ChevronDown className="ml-1 h-4 w-4" />
+                      <ChevronDown className="h-4 w-4" />
                     ))}
                 </div>
               </TableHead>
               <TableHead>Recurring</TableHead>
-              <TableHead></TableHead>
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedTransactions.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center text-muted-foreground"
-                >
-                  No transactions found
+                <TableCell colSpan={7} className="text-center py-12">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center">
+                      <Search className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground font-medium">
+                        No transactions found
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Try adjusting your search or filters
+                      </p>
+                    </div>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               paginatedTransactions.map((transaction) => (
-                <TableRow key={transaction.id}>
+                <TableRow
+                  key={transaction.id}
+                  className="hover:bg-muted/30 transition-colors"
+                >
                   <TableCell>
                     <Checkbox
                       checked={selectedIds.includes(transaction.id)}
                       onCheckedChange={() => handleSelect(transaction.id)}
                     />
                   </TableCell>
-                  <TableCell>
-                    {format(new Date(transaction.date), 'PP')}
+                  <TableCell className="font-medium">
+                    {format(new Date(transaction.date), 'MMM dd, yyyy')}
                   </TableCell>
-                  <TableCell>{transaction.description}</TableCell>
-                  <TableCell className={'capitalize'}>
+                  <TableCell>
+                    <div className="max-w-[200px] truncate">
+                      {transaction.description || 'No description'}
+                    </div>
+                  </TableCell>
+                  <TableCell>
                     <span
                       style={{
                         background: categoryColors[transaction.category],
                       }}
-                      className="px-2 py-1 rounded-2xl text-white text-sm font-light"
+                      className="px-3 py-1 rounded-full text-white text-xs font-medium"
                     >
                       {transaction.category}
                     </span>
                   </TableCell>
-                  <TableCell
-                    style={{
-                      color:
-                        transaction.type === 'EXPENSE' ? '#e74c3c' : '#6ab04c',
-                    }}
-                    className="font-extrabold"
-                  >
-                    <span>$ {transaction.amount.toFixed(2)}</span>
+                  <TableCell>
+                    <span
+                      className={`font-semibold text-lg ${
+                        transaction.type === 'EXPENSE'
+                          ? 'expense-negative'
+                          : 'income-positive'
+                      }`}
+                    >
+                      {formatCurrency(transaction.amount)}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {transaction.isRecurring ? (
@@ -388,7 +411,7 @@ const TransactionTable = ({ transactions }) => {
                           <TooltipTrigger>
                             <Badge
                               variant="secondary"
-                              className="gap-1 bg-purple-100 text-purple-700 hover:bg-purple-200"
+                              className="gap-1 bg-primary/10 text-primary hover:bg-primary/20"
                             >
                               <RefreshCw className="h-3 w-3" />
                               {
@@ -422,7 +445,10 @@ const TransactionTable = ({ transactions }) => {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 hover:bg-muted"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -451,10 +477,10 @@ const TransactionTable = ({ transactions }) => {
             )}
           </TableBody>
         </Table>
-        <div className="my-2">
-          {/* Pagination UI */}
-          <Pagination>
-            <PaginationContent>
+        {/* Pagination UI */}
+        <div className="flex justify-end my-3">
+          <Pagination className="w-auto">
+            <PaginationContent className="flex-wrap">
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
@@ -465,20 +491,73 @@ const TransactionTable = ({ transactions }) => {
                 />
               </PaginationItem>
 
-              {/* Render page numbers dynamically */}
-              {Array.from({ length: numPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    onClick={() => handlePageChange(page)}
-                    isActive={currentPage === page}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
+              {/* Show limited page numbers on mobile */}
+              {numPages <= 5 ? (
+                // Show all pages if 5 or fewer
+                Array.from({ length: numPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        href="#"
+                        onClick={() => handlePageChange(page)}
+                        isActive={currentPage === page}
+                        className="w-8 h-8 p-0 flex items-center justify-center"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                )
+              ) : (
+                // Show smart pagination for more than 5 pages
+                <>
+                  {/* Always show first page */}
+                  <PaginationItem>
+                    <PaginationLink
+                      href="#"
+                      onClick={() => handlePageChange(1)}
+                      isActive={currentPage === 1}
+                      className="w-8 h-8 p-0 flex items-center justify-center"
+                    >
+                      1
+                    </PaginationLink>
+                  </PaginationItem>
 
-              {numPages > 5 && <PaginationEllipsis />}
+                  {/* Show ellipsis if current page is far from start */}
+                  {currentPage > 3 && <PaginationEllipsis />}
+
+                  {/* Show current page and neighbors */}
+                  {currentPage > 1 && currentPage < numPages && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={() => handlePageChange(currentPage)}
+                        isActive={true}
+                        className="w-8 h-8 p-0 flex items-center justify-center"
+                      >
+                        {currentPage}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {/* Show ellipsis if current page is far from end */}
+                  {currentPage < numPages - 2 && <PaginationEllipsis />}
+
+                  {/* Always show last page if not already shown */}
+                  {currentPage !== numPages && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={() => handlePageChange(numPages)}
+                        isActive={currentPage === numPages}
+                        className="w-8 h-8 p-0 flex items-center justify-center"
+                      >
+                        {numPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+                </>
+              )}
 
               <PaginationItem>
                 <PaginationNext

@@ -8,47 +8,35 @@ const Header = async () => {
   await checkUser()
 
   return (
-    <div className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
+    <div className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b border-border">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/">
-          {/* <Image
-            src={'/logo.png'}
-            alt="Welth Logo"
-            width={200}
-            height={60}
-            className="h-12 w-auto object-contain"
-          /> */}
-          <span className="">Spendly</span>
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-sm">S</span>
+          </div>
+          <span className="font-bold text-xl text-foreground">Spendly</span>
         </Link>
 
         <div className="flex items-center space-x-4">
           <SignedIn>
-            <Link
-              href="/dashboard"
-              className="text-gray-600 hover:text-blue-600 flex items-center gap-2"
-            >
-              <Button variant="outline">
+            <Link href="/dashboard">
+              <Button variant="outline" className="financial-card">
                 <LayoutDashboard size={18} />
                 <span className="hidden md:inline">Dashboard</span>
               </Button>
             </Link>
-            <a href="/transaction/create">
-              <Button className="flex items-center gap-2">
+            <Link href="/transaction/create">
+              <Button className="financial-primary flex items-center gap-2">
                 <PenBox size={18} />
                 <span className="hidden md:inline">Add Transaction</span>
               </Button>
-            </a>
+            </Link>
           </SignedIn>
 
           <SignedOut>
             <SignInButton forceRedirectUrl="/dashboard">
-              <Button variant={'outline'}>Login</Button>
+              <Button variant="outline" className="financial-card">Login</Button>
             </SignInButton>
-            {/* <SignUpButton>
-            <button className="bg-[#6c47ff] text-ceramic-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
-              Sign Up
-            </button>
-          </SignUpButton> */}
           </SignedOut>
           <SignedIn>
             <UserButton

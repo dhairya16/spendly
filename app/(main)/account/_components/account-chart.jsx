@@ -1,17 +1,5 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
-import { format, subDays, startOfDay, endOfDay } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
@@ -20,6 +8,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { formatCurrency } from '@/lib/currency'
+import { endOfDay, format, startOfDay, subDays } from 'date-fns'
+import { useMemo, useState } from 'react'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
 const DATE_RANGES = {
   '7D': { label: 'Last 7 Days', days: 7 },
@@ -99,13 +100,13 @@ export default function AccountChart({ transactions }) {
           <div className="text-center">
             <p className="text-muted-foreground">Total Income</p>
             <p className="text-lg font-bold text-green-500">
-              ${totals.income.toFixed(2)}
+              {formatCurrency(totals.income)}
             </p>
           </div>
           <div className="text-center">
             <p className="text-muted-foreground">Total Expenses</p>
             <p className="text-lg font-bold text-red-500">
-              ${totals.expense.toFixed(2)}
+              {formatCurrency(totals.expense)}
             </p>
           </div>
           <div className="text-center">
@@ -117,7 +118,7 @@ export default function AccountChart({ transactions }) {
                   : 'text-red-500'
               }`}
             >
-              ${(totals.income - totals.expense).toFixed(2)}
+              {formatCurrency(totals.income - totals.expense)}
             </p>
           </div>
         </div>
@@ -138,13 +139,13 @@ export default function AccountChart({ transactions }) {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => formatCurrency(value)}
               />
               <Tooltip
-                formatter={(value) => [`$${value}`, undefined]}
+                formatter={(value) => [formatCurrency(value), undefined]}
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--popover))',
-                  border: '1px solid hsl(var(--border))',
+                  backgroundColor: 'var(--popover)',
+                  border: '1px solid var(--border)',
                   borderRadius: 'var(--radius)',
                 }}
               />

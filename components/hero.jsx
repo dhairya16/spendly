@@ -1,65 +1,59 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { ArrowRight, Shield, TrendingUp, Zap } from 'lucide-react'
 import Link from 'next/link'
 
 const HeroSection = () => {
-  // const imageRef = useRef(null)
-
-  // useEffect(() => {
-  //   const imageElement = imageRef.current
-
-  //   const handleScroll = () => {
-  //     const scrollPosition = window.scrollY
-  //     const scrollThreshold = 100
-
-  //     if (scrollPosition > scrollThreshold) {
-  //       imageElement.classList.add('scrolled')
-  //     } else {
-  //       imageElement.classList.remove('scrolled')
-  //     }
-  //   }
-
-  //   window.addEventListener('scroll', handleScroll)
-  //   return () => window.removeEventListener('scroll', handleScroll)
-  // }, [])
-
   return (
-    <section className="pt-40 pb-20 px-4">
-      <div className="container mx-auto text-center">
-        <h1 className="text-5xl md:text-8xl lg:text-[105px] pb-6 gradient-title">
-          Manage Your Finances <br /> with Intelligence
+    <section className="pt-24 pb-16 px-4">
+      <div className="container mx-auto max-w-4xl text-center">
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <Zap className="h-4 w-4" />
+            AI-Powered Financial Management
+          </div>
+        </div>
+
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+          Take Control of Your
+          <span className="gradient-title block">Financial Future</span>
         </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          An AI-powered financial management platform that helps you track,
-          analyze, and optimize your spending with real-time insights.
+
+        <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+          Smart expense tracking, intelligent budgeting, and personalized
+          insights to help you achieve your financial goals.
         </p>
-        <div className="flex justify-center space-x-4">
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <Link href="/dashboard">
-            <Button size="lg" className="px-8">
-              Get Started
+            <Button size="lg" className="financial-primary px-8 py-3 text-lg">
+              Start Managing Finances
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
-          <Link href="https://www.youtube.com/roadsidecoder">
-            <Button size="lg" variant="outline" className="px-8">
-              Watch Demo
+          <Link href="/sign-in">
+            <Button size="lg" variant="outline" className="px-8 py-3 text-lg">
+              Sign In
             </Button>
           </Link>
         </div>
-        {/* <div className="hero-image-wrapper mt-5 md:mt-0">
-          <div ref={imageRef} className="hero-image">
-            <Image
-              src="/banner.jpeg"
-              width={1280}
-              height={720}
-              alt="Dashboard Preview"
-              className="rounded-lg shadow-2xl border mx-auto"
-              priority
-            />
+
+        {/* Key Benefits */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+          <div className="flex items-center justify-center gap-3 text-muted-foreground">
+            <Zap className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium">AI Insights</span>
           </div>
-        </div> */}
+          <div className="flex items-center justify-center gap-3 text-muted-foreground">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium">Smart Analytics</span>
+          </div>
+          <div className="flex items-center justify-center gap-3 text-muted-foreground">
+            <Shield className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium">Secured</span>
+          </div>
+        </div>
       </div>
     </section>
   )
