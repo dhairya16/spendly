@@ -1,7 +1,8 @@
-import { createMiddleware } from '@arcjet/next'
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import aj from './lib/arcjet'
+// Note: Arcjet removed from middleware to reduce Edge Function bundle size on Vercel.
+// If you need Arcjet protections, consider moving them to an API route or server-side
+// function to avoid bundling the Arcjet client into the Edge runtime.
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
@@ -41,9 +42,9 @@ const clerk = clerkMiddleware(async (auth, req) => {
   return NextResponse.next()
 })
 
-// Chain middlewares - ArcJet runs first, then Clerk
-// Pass the initialized Arcjet client (aj) first so createMiddleware can call aj.protect
-export default createMiddleware(aj, clerk)
+// Export Clerk middleware only (runs on the Edge runtime). This avoids importing
+// the Arcjet client into the Edge bundle which can exceed Vercel's size limit.
+export default clerk
 
 export const config = {
   matcher: [
