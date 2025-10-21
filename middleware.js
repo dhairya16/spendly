@@ -1,6 +1,7 @@
-import arcjet, { createMiddleware, detectBot, shield } from '@arcjet/next'
+import { createMiddleware } from '@arcjet/next'
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
+import aj from './lib/arcjet'
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
@@ -8,25 +9,25 @@ const isProtectedRoute = createRouteMatcher([
   '/transaction(.*)',
 ])
 
-// Create Arcjet middleware
-const aj = arcjet({
-  key: process.env.ARCJET_KEY,
-  // characteristics: ["userId"], // Track based on Clerk userId
-  rules: [
-    // Shield protection for content and security
-    shield({
-      mode: 'LIVE',
-    }),
-    detectBot({
-      mode: 'LIVE', // will block requests. Use "DRY_RUN" to log only
-      allow: [
-        'CATEGORY:SEARCH_ENGINE', // Google, Bing, etc
-        'GO_HTTP', // For Inngest
-        // See the full list at https://arcjet.com/bot-list
-      ],
-    }),
-  ],
-})
+// // Create Arcjet middleware
+// const aj = arcjet({
+//   key: process.env.ARCJET_KEY,
+//   // characteristics: ["userId"], // Track based on Clerk userId
+//   rules: [
+//     // Shield protection for content and security
+//     shield({
+//       mode: 'LIVE',
+//     }),
+//     detectBot({
+//       mode: 'LIVE', // will block requests. Use "DRY_RUN" to log only
+//       allow: [
+//         'CATEGORY:SEARCH_ENGINE', // Google, Bing, etc
+//         'GO_HTTP', // For Inngest
+//         // See the full list at https://arcjet.com/bot-list
+//       ],
+//     }),
+//   ],
+// })
 
 // Create base Clerk middleware
 const clerk = clerkMiddleware(async (auth, req) => {
@@ -41,6 +42,7 @@ const clerk = clerkMiddleware(async (auth, req) => {
 })
 
 // Chain middlewares - ArcJet runs first, then Clerk
+// Pass the initialized Arcjet client (aj) first so createMiddleware can call aj.protect
 export default createMiddleware(aj, clerk)
 
 export const config = {
