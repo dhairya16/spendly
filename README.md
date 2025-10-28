@@ -29,9 +29,6 @@ Visualize your spending patterns and get smart insights powered by AI.
 
 ### 💌 Budget Alerts via Email
 Stay on track with personalized email alerts when you’re nearing your monthly budget.
-<p align="center">
-  <img src="./public/screenshots/email-alert.png" alt="Budget Alert Email" width="600" />
-</p>
 
 ## 🧰 Tech Stack
 
