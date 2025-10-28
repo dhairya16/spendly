@@ -15,16 +15,16 @@
 ### 🧾 AI Receipt Scanner
 Upload any receipt — Spendly’s AI automatically extracts the total, category, and date for you.
 <p align="center">
-  <img src="./public/gifs/ai-receipt.gif" alt="AI Receipt Scanner" width="600" />
+  <img src="./public/ai-receipt.gif" alt="AI Receipt Scanner" width="600" />
 </p>
 
 ### 📊 AI-Powered Monthly Reports
 Visualize your spending patterns and get smart insights powered by AI.
 <p align="center">
-  <img src="./public/screenshots/ai-report1.png" alt="AI Reports" width="600" />
+  <img src="./public/ai-report1.png" alt="AI Reports" width="600" />
 </p>
 <p align="center">
-  <img src="./public/screenshots/ai-report2.png" alt="AI Reports" width="600" />
+  <img src="./public/ai-report2.png" alt="AI Reports" width="600" />
 </p>
 
 ### 💌 Budget Alerts via Email
