@@ -21,7 +21,10 @@ Upload any receipt — Spendly’s AI automatically extracts the total, category
 ### 📊 AI-Powered Monthly Reports
 Visualize your spending patterns and get smart insights powered by AI.
 <p align="center">
-  <img src="./public/screenshots/ai-report.png" alt="AI Reports" width="600" />
+  <img src="./public/screenshots/ai-report1.png" alt="AI Reports" width="600" />
+</p>
+<p align="center">
+  <img src="./public/screenshots/ai-report2.png" alt="AI Reports" width="600" />
 </p>
 
 ### 💌 Budget Alerts via Email
