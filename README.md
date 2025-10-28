@@ -4,12 +4,6 @@
   Smart expense tracking with AI receipt scanning, monthly reports, and budget alerts.
 </p>
 
-<p align="center">
-  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Built%20with-Next.js-black?logo=next.js" /></a>
-  <a href="#"><img src="https://img.shields.io/badge/AI%20Powered-Yes-blue" /></a>
-  <a href="https://vercel.com"><img src="https://img.shields.io/badge/Deployed%20on-Vercel-lightgrey?logo=vercel" /></a>
-</p>
-
 ## 🚀 Features
 
 ### 🧾 AI Receipt Scanner
